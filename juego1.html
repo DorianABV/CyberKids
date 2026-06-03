@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberKids - ¿Hacker o Amigo?</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        .game-screen {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 4px solid #4a90e2;
+        }
+        #card {
+            background-color: #f8f9fa;
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 30px 20px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin: 25px 0;
+            font-weight: 500;
+        }
+        .btn-game {
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin: 0 10px;
+            color: white;
+        }
+        .btn-game:active { transform: scale(0.95); }
+        .btn-safe { background-color: #06d6a0; }
+        .btn-danger { background-color: #ef476f; }
+        #feedback-message {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-height: 27px;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+    <div class="nav-container">
+        <div class="logo">🛡️ CyberKids</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="juegos.html">Jugar y Aprender</a></li>
+                <li><a href="teoria.html">Biblioteca Segura</a></li>
+                <li><a href="familia.html">Espacio Familiar</a></li> <!-- El nuevo enlace -->
+            </ul>
+        </nav>
+        <div class="global-score">Puntos: <span id="user-points">0</span> 🌟</div>
+    </div>
+    </header>
+
+    <main style="padding: 20px;">
+        <div class="game-screen">
+            <h2>Misión 1: ¿Hacker o Amigo? 🧑‍💻</h2>
+            <p>Lee la situación digital y decide si debes confiar o bloquear para proteger tus datos.</p>
+            
+            <div id="card">Cargando misión...</div>
+
+            <div class="game-actions">
+                <button class="btn-game btn-danger" onclick="procesarRespuesta('bloquear')">🚫 Bloquear / Reportar</button>
+                <button class="btn-game btn-safe" onclick="procesarRespuesta('confiar')">✅ Es Seguro / Confiar</button>
+            </div>
+
+            <div id="feedback-message"></div>
+            
+            <a href="juegos.html" class="btn-back">⬅️ Volver a Selección de Misiones</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 CyberKids - Proyecto de Ciberseguridad. Desarrollado con fines educativos.</p>
+    </footer>
+
+    <script src="js/juego1.js"></script>
+    <script src="js/cyber-matrix.js"></script>
+</body>
+</html>

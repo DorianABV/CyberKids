@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberKids - Academia de Módulos</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>    <!-- Librería para convertir el HTML del certificado en una imagen descargable PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .page-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* ESTILO ACADEMIA HACK THE BOX */
+        .htb-module {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(0, 210, 255, 0.15);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .htb-module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .progress-bar-bg {
+            background-color: #21262d;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background-color: var(--cyber-green);
+            width: 0%;
+            height: 100%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--cyber-green);
+        }
+        .reading-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.02);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .reading-checkbox:hover {
+            border-color: rgba(0, 255, 102, 0.3);
+            background: rgba(0, 255, 102, 0.02);
+        }
+        .reading-checkbox input {
+            accent-color: var(--cyber-green);
+            transform: scale(1.2);
+        }
+
+        /* RECOMPENSA DE CERTIFICADO */
+        .certificate-zone {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border: 2px dashed var(--cyber-yellow);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.1);
+        }
+
+        /* MODAL / VENTANA EMERGENTE DEL CERTIFICADO */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none; /* Oculto inicialmente */
+        }
+        .certificate-box {
+            background: #0d1117;
+            border: 5px double var(--cyber-blue);
+            padding: 40px;
+            width: 700px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.3);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .cert-title { color: var(--cyber-yellow); font-size: 2.2rem; font-weight: bold; margin-bottom: 5px; }
+        .cert-subtitle { color: #ffffff; letter-spacing: 2px; font-size: 0.9rem; }
+        .cert-name { font-size: 2rem; color: var(--cyber-green); margin: 25px 0; text-decoration: underline; font-weight: bold; }
+        
+        /* ESTILOS PREVIOS DE LA MASCOTA */
+        .mascot-aside { background-color: var(--bg-card); border: 2px solid #21262d; border-radius: 12px; padding: 25px; text-align: center; height: fit-content; }
+        .mascot-display-container { background: radial-gradient(circle, #1a2333 0%, #0d1117 100%); border: 2px solid #21262d; height: 180px; border-radius: 10px; margin: 15px 0; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .cyber-robot { display: flex; flex-direction: column; align-items: center; animation: floatRobot 4s ease-in-out infinite; opacity: 0.3; filter: grayscale(100%); }
+        .robot-head { width: 55px; height: 40px; background-color: #30363d; border: 2px solid #58a6ff; border-radius: 10px; display: flex; justify-content: center; align-items: center; margin-bottom: 6px; position: relative; }
+        .robot-eyes { display: flex; gap: 10px; }
+        .eye { width: 8px; height: 8px; background-color: #484f58; border-radius: 50%; }
+        .robot-body { width: 65px; height: 55px; background-color: #30363d; border: 2px solid #58a6ff; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
+        .robot-core { width: 16px; height: 16px; background-color: #484f58; border-radius: 50%; }
+        .cyber-helmet { width: 40px; height: 6px; background-color: var(--cyber-red); border-radius: 3px; position: absolute; top: -5px; box-shadow: 0 0 10px var(--cyber-red); display: none; }
+        .cyber-shields { position: absolute; width: 100px; display: none; }
+        .shield-wing { width: 6px; height: 40px; background: linear-gradient(to bottom, transparent, var(--cyber-blue), transparent); border-left: 2px solid #ffffff; position: absolute; top: -20px; }
+        .shield-wing.left { left: 0; }.shield-wing.right { right: 0; }
+        .robot-active { opacity: 1 !important; filter: grayscale(0%) !important; }
+        .robot-active .eye { background-color: var(--cyber-blue); box-shadow: 0 0 8px var(--cyber-blue); }
+        .robot-active .robot-core { background-color: var(--cyber-green); box-shadow: 0 0 10px var(--cyber-green); }
+        .pet-console { background-color: #010409; border: 1px solid #30363d; border-radius: 6px; padding: 10px; height: 50px; overflow-y: auto; text-align: left; font-family: 'Courier New', monospace; font-size: 0.75rem; margin-bottom: 12px; }
+        .console-line { color: #8b949e; }.text-success { color: var(--cyber-green); }.text-alert { color: var(--cyber-yellow); }.text-error { color: var(--cyber-red); }
+        .shop-btn { background-color: transparent; color: var(--cyber-blue); border: 1px solid var(--cyber-blue); padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .shop-btn:disabled { background-color: #21262d; color: #484f58; border-color: #30363d; cursor: not-allowed; }
+        .shop-item { background: #161b22; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+        @keyframes floatRobot { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">🛡️ CyberKids</div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="juegos.html">Jugar y Aprender</a></li>
+                    <li><a href="teoria.html" class="active">Biblioteca Segura</a></li>
+                    <li><a href="familia.html">Espacio Familiar</a></li>
+                </ul>
+            </nav>
+            <div class="global-score">Puntos: <span id="user-points">0</span> 🌟</div>
+        </div>
+    </header>
+
+    <div class="page-layout">
+        
+        <main>
+            <h2 style="font-family: 'Courier New', monospace; color: var(--cyber-blue);">🎯 ACADEMIA DE ENTRENAMIENTO DEFENSIVO</h2>
+            <p>Completa las lecturas de los módulos tácticos para desbloquear tu certificación oficial del sistema.</p>
+
+            <div class="htb-module" id="mod1">
+                <div class="htb-module-header">
+                    <h3>Módulo 01: Infraestructura de Contraseñas</h3>
+                    <span class="global-score" style="font-size: 0.8rem;">+15 Pts</span>
+                </div>
+                <p>Las contraseñas son las llaves criptográficas de tu identidad digital. Un hacker usa software automatizado para adivinar combinaciones simples en segundos. Para blindar tus cuentas, mezcla letras mayúsculas, minúsculas, números y caracteres especiales (ej: !, #, $).</p>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="fill-m1"></div></div>
+                <label class="reading-checkbox">
+                    <input type="checkbox" id="chk-m1" onchange="actualizarModulo(1, 15)">
+                    <span>[ ] Marcar laboratorio de lectura como COMPLETADO e inyectar logs.</span>
+                </label>
+            </div>
+
+            <div class="htb-module" id="mod2">
+                <div class="htb-module-header">
+                    <h3>Módulo 02: Protocolos de Privacidad y Redes</h3>
+                    <span class="global-score" style="font-size: 0.8rem;">+15 Pts</span>
+                </div>
+                <p>Nunca compartas metadatos ni información confidencial como tu geolocalización, el nombre de tu colegio o números telefónicos en chats públicos. Los atacantes pueden recopilar estos vectores de ataque para realizar suplantación de identidad o estafas dirigidas.</p>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="fill-m2"></div></div>
+                <label class="reading-checkbox">
+                    <input type="checkbox" id="chk-m2" onchange="actualizarModulo(2, 15)">
+                    <span>[ ] Marcar laboratorio de lectura como COMPLETADO e inyectar logs.</span>
+                </label>
+            </div>
+
+            <div class="certificate-zone">
+                <h3 style="color: var(--cyber-yellow);">📜 CENTRO DE EMISIÓN DE CREDENCIALES</h3>
+                <p>Al completar el 100% de la ruta académica, el sistema habilitará la compilación de tu Diploma de Ciberseguridad.</p>
+                <button class="shop-btn" id="btn-open-cert" style="border-color: var(--cyber-yellow); color: var(--cyber-yellow); width: auto; padding: 12px 30px;" disabled onclick="mostrarModalCertificado()">
+                    GENERAR CERTIFICADO OFICIAL
+                </button>
+            </div>
+        </main>
+
+        <aside class="mascot-aside">
+            <h3 style="color: var(--cyber-yellow) !important;">SISTEMA IA: "BYTE.EXE" 🤖</h3>
+            <p id="mascot-status" style="font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--cyber-red);">
+                [ESTADO]: Bloqueado. Requiere 20★
+            </p>
+            
+            <div class="mascot-display-container">
+                <div class="cyber-robot" id="robot-mesh">
+                    <div class="cyber-helmet" id="gear-helmet"></div>
+                    <div class="robot-head">
+                        <div class="robot-eyes"><div class="eye"></div><div class="eye"></div></div>
+                    </div>
+                    <div class="robot-body"><div class="robot-core"></div></div>
+                    <div class="cyber-shields" id="gear-shields">
+                        <div class="shield-wing left"></div><div class="shield-wing right"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pet-console" id="pet-log-console">
+                <div class="console-line text-alert">> Inicialice el asistente táctico...</div>
+            </div>
+
+            <div id="interaction-zone" style="display:none;">
+                <h4 style="margin: 10px 0; font-size: 0.9rem; color: var(--cyber-blue);">MÓDULOS DE EXPANSIÓN</h4>
+                <div class="shop-item">
+                    <span>🛡️ Firewall (30★)</span>
+                    <button class="shop-btn" style="width:auto;" onclick="comprarAccesorio('FIREWALL', 30)">Inyectar</button>
+                </div>
+                <div class="shop-item">
+                    <span>👑 Kernel (50★)</span>
+                    <button class="shop-btn" style="width:auto;" onclick="comprarAccesorio('KERNEL', 50)">Inyectar</button>
+                </div>
+            </div>
+
+            <button id="btn-adopt" class="shop-btn" style="color: var(--cyber-green); border-color: var(--cyber-green);" onclick="adoptarMascota()">BOOT_SYSTEM (20 pts)</button>
+        </aside>
+    </div>
+
+    <!-- WINDOW MODAL: EL CERTIFICADO CIBERNÉTICO MEJORADO -->
+    <div class="modal-overlay" id="cert-modal">
+        <div class="modal-content-wrapper" style="max-width: 750px; width: 100%; text-align: center;">
+            
+            <!-- COMIENZO DEL DIPLOMA IMPRIMIBLE (A esto se le tomará la foto) -->
+            <div id="printable-certificate" style="background: linear-gradient(135deg, #0e1726 0%, #070b12 100%); border: 6px solid var(--cyber-blue); padding: 40px; border-radius: 15px; position: relative; box-shadow: 0 0 30px rgba(0, 210, 255, 0.2); font-family: 'Courier New', monospace; color: #ffffff; text-align: center;">
+                
+                <!-- Decoraciones Cyber-Infantiles en las esquinas -->
+                <div style="position: absolute; top: 10px; left: 10px; color: var(--cyber-green); font-size: 1.2rem;">[⚡]</div>
+                <div style="position: absolute; top: 10px; right: 10px; color: var(--cyber-yellow); font-size: 1.2rem;">[🛡️]</div>
+                
+                <div style="font-size: 2.4rem; font-weight: bold; color: var(--cyber-yellow); text-shadow: 0 0 10px rgba(255,183,3,0.5); margin-bottom: 5px;">
+                    CYBERKIDS ACADEMY
+                </div>
+                <div style="letter-spacing: 3px; font-size: 0.9rem; color: var(--cyber-blue); font-weight: bold;">
+                    • DIPLOMA DE AGENTE DEFENSIVO DE LA RED •
+                </div>
+                
+                <br><br>
+                <p style="color: #cbd5e1; font-size: 1.1rem;">Por haber demostrado superpoderes digitales, se otorga a:</p>
+                
+                <!-- Input estilizado para el nombre -->
+                <input type="text" id="student-name" placeholder="[ ESCRIBE TU NOMBRE AQUÍ ]" 
+                       style="background: rgba(255,255,255,0.03); border: none; border-bottom: 3px dashed var(--cyber-green); color: var(--cyber-green); font-size: 2rem; text-align: center; width: 85%; font-family: 'Courier New', monospace; margin: 15px 0; padding: 5px; outline: none; font-weight: bold;">
+                
+                <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6; padding: 0 30px; margin-top: 15px;">
+                    El rango oficial de **Cyber-Héroe**. El portador de esta credencial ha aprendido con éxito las tácticas secretas para crear contraseñas ultra-fuertes, detectar trampas en internet y proteger los datos de toda su familia.
+                </p>
+                
+                <br><br>
+                <!-- Firmas y sellos de simulación de la mascota -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 20px;">
+                    <div style="text-align: left; font-size: 0.8rem; color: #64748b;">
+                        <div>CÓDIGO: CK-HERO-2026</div>
+                        <div>SISTEMA: VERIFICADO UCV</div>
+                    </div>
+                    <div style="border-top: 1px solid #475569; width: 150px; font-size: 0.8rem; color: var(--cyber-green); padding-top: 5px;">
+                        🤖 BYTE.EXE <br> <span style="font-size:0.6rem; color:#64748b;">Asistente Táctico</span>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN DEL DIPLOMA IMPRIMIBLE -->
+
+            <!-- ZONA DE ACCIONES (No salen en la foto/impresión) -->
+            <div style="background: #0d1117; padding: 20px; border-radius: 0 0 12px 12px; border: 1px solid #21262d; border-top: none; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                
+                <input type="email" id="student-email" placeholder="Introduce tu correo familiar" 
+                       style="background: #161b22; border: 1px solid #30363d; padding: 10px; border-radius: 6px; color: white; width: 60%; text-align: center;">
+                
+                <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
+                    <button class="shop-btn" style="color: var(--cyber-yellow); border-color: var(--cyber-yellow); width: auto; padding: 10px 20px;" onclick="descargarCertificadoImagen()">
+                        📸 DESCARGAR FOTO PARA IMPRIMIR
+                    </button>
+                    <button class="shop-btn" style="color: var(--cyber-green); border-color: var(--cyber-green); width: auto; padding: 10px 20px;" onclick="enviarCertificadoPorCorreo()">
+                        🚀 ENVIAR AL CORREO
+                    </button>
+                    <button class="shop-btn" style="color: var(--cyber-red); border-color: var(--cyber-red); width: auto; padding: 10px 20px;" onclick="cerrarModalCertificado()">
+                        SALIR
+                    </button>
+                </div>
+                <p id="email-status-msg" style="margin-top: 5px; font-weight: bold; font-size: 0.85rem;"></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+// INICIALIZACIÓN COMPATIBLE DE EMAILJS
+        // Usamos el método robusto para asegurar que la llave pública se inyecte en cada petición SMTP
+        emailjs.init({
+            publicKey: "tS0Y50AWUTT8FRopj"
+        });
+
+        let puntos = parseInt(localStorage.getItem("cyberkids_score")) || 0;
+        let esAdoptado = localStorage.getItem("mascota_adoptada") === "true";
+        let accesorioActual = localStorage.getItem("mascota_accesorio") || "";
+
+        // Estado de los módulos leídos
+        let m1Completado = false;
+        let m2Completado = false;
+
+        const txtPoints = document.getElementById("user-points");
+        const robotMesh = document.getElementById("robot-mesh");
+        const statusText = document.getElementById("mascot-status");
+        const btnAdopt = document.getElementById("btn-adopt");
+        const interactionZone = document.getElementById("interaction-zone");
+        const consoleBox = document.getElementById("pet-log-console");
+        const elementShields = document.getElementById("gear-shields");
+        const elementHelmet = document.getElementById("gear-helmet");
+        const btnCert = document.getElementById("btn-open-cert");
+
+        function enviarLogConsola(texto, tipo) {
+            let cl = "console-line";
+            if(tipo === "ok") cl += " text-success";
+            if(tipo === "warn") cl += " text-alert";
+            if(tipo === "err") cl += " text-error";
+            consoleBox.innerHTML = `<div class="${cl}">> ${texto}</div>` + consoleBox.innerHTML;
+        }
+
+        // LÓGICA DE ACTUALIZACIÓN DE MÓDULOS (ESTILO HTB)
+        function actualizarModulo(idNum, recompensa) {
+            const check = document.getElementById(`chk-m${idNum}`);
+            
+            if (idNum === 1) {
+                m1Completado = check.checked;
+                document.getElementById("fill-m1").style.width = m1Completado ? "100%" : "0%";
+                if(m1Completado) {
+                    puntos += recompensa;
+                    enviarLogConsola("Módulo 01 descifrado. +15 estrellas.", "ok");
+                }
+            } else {
+                m2Completado = check.checked;
+                document.getElementById("fill-m2").style.width = m2Completado ? "100%" : "0%"; // <-- Corregido para que afecte a fill-m2
+                if(m2Completado) {
+                    puntos += recompensa;
+                    enviarLogConsola("Módulo 02 descifrado. +15 estrellas.", "ok");
+                }
+            }
+            
+            localStorage.setItem("cyberkids_score", puntos);
+            txtPoints.innerText = puntos;
+
+            // Si completa todos los módulos, se desbloquea el generador de certificados
+            if (m1Completado && m2Completado) {
+                btnCert.disabled = false;
+                enviarLogConsola("¡RUTA COMPLETADA! Credencial de egreso liberada.", "warn");
+            } else {
+                btnCert.disabled = true;
+            }
+        }
+
+        // OPERACIONES DEL MODAL DEL DIPLOMA
+        function mostrarModalCertificado() {
+            document.getElementById("cert-modal").style.display = "flex";
+        }
+        function cerrarModalCertificado() {
+            document.getElementById("cert-modal").style.display = "none";
+        }
+
+        // FUNCIÓN CLAVE: ENVÍO REAL DEL DIPLOMA POR EMAILJS
+        // REEMPLAZA TU FUNCIÓN DE ENVÍO POR ESTA:
+        function enviarCertificadoPorCorreo() {
+            const nombre = document.getElementById("student-name").value.trim();
+            const correo = document.getElementById("student-email").value.trim();
+            const statusMsg = document.getElementById("email-status-msg");
+
+            if (!nombre || nombre === "[ ESCRIBE TU NOMBRE AQUÍ ]" || !correo) {
+                statusMsg.innerText = "❌ ERROR: Debe completar los campos de identidad y correo.";
+                statusMsg.style.color = "var(--cyber-red)";
+                return;
+            }
+
+            statusMsg.innerText = "📸 Procesando y comprimiendo diploma táctico...";
+            statusMsg.style.color = "var(--cyber-yellow)";
+
+            const certificadoTarget = document.getElementById("printable-certificate");
+
+            // Optimizamos las opciones de captura para reducir drásticamente el peso de la variable
+            html2canvas(certificadoTarget, {
+                backgroundColor: "#0e1726", 
+                scale: 0.8, // Escala menor para optimizar los Kilobytes generados
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // CAMBIO CLAVE: Convertimos a JPEG con una compresión de calidad del 60% (0.6)
+                // Esto hace que la foto pese un 80% menos que un PNG y pase sin problemas la API.
+                const imagenBase64Comprimida = canvas.toDataURL('image/jpeg', 0.6);
+
+                statusMsg.innerText = "🚀 Transmitiendo paquete optimizado (<50Kb) a EmailJS...";
+                statusMsg.style.color = "var(--cyber-blue)";
+
+                const templateParams = {
+                    to_name: nombre,
+                    to_email: correo,
+                    cert_image_base64: imagenBase64Comprimida 
+                };
+
+                emailjs.send('service_duzfk43', 'template_d6cuxn8', templateParams)
+                    .then(function(response) {
+                        statusMsg.innerText = "🟩 ¡DIPLOMA GRÁFICO ENVIADO! Revisa tu bandeja de entrada. 📬🎉";
+                        statusMsg.style.color = "var(--cyber-green)";
+                        enviarLogConsola(`Certificado multimedia enviado a: ${correo}`, "ok");
+                    }, function(error) {
+                        statusMsg.innerText = "❌ ERROR API (" + error.status + "): " + error.text;
+                        statusMsg.style.color = "var(--cyber-red)";
+                        console.error("Fallo detallado:", error);
+                    });
+
+            }).catch(err => {
+                statusMsg.innerText = "❌ ERROR: Error interno al renderizar el bitmap.";
+                statusMsg.style.color = "var(--cyber-red)";
+                console.error(err);
+            });
+        }
+
+        // LÓGICA REGULAR DE LA MASCOTA
+        function actualizarInterfazMascota() {
+            txtPoints.innerText = puntos;
+            if (esAdoptado) {
+                robotMesh.classList.add("robot-active");
+                statusText.innerText = "[ESTADO]: BYTE_IA activo.";
+                statusText.style.color = "var(--cyber-green)";
+                btnAdopt.style.display = "none";
+                interactionZone.style.display = "block";
+                elementShields.style.display = accesorioActual === "FIREWALL" ? "block" : "none";
+                elementHelmet.style.display = accesorioActual === "KERNEL" ? "block" : "none";
+            } else {
+                robotMesh.classList.remove("robot-active");
+                btnAdopt.disabled = puntos < 20;
+            }
+        }
+
+        function adoptarMascota() {
+            if (puntos >= 20) {
+                puntos -= 20; esAdoptado = true;
+                localStorage.setItem("cyberkids_score", puntos);
+                localStorage.setItem("mascota_adoptada", "true");
+                enviarLogConsola("BYTE.EXE initialized correctly.", "ok");
+                actualizarInterfazMascota();
+            }
+        }
+
+        function comprarAccesorio(tipo, coste) {
+            if (puntos >= coste) {
+                puntos -= coste; accesorioActual = tipo;
+                localStorage.setItem("cyberkids_score", puntos);
+                localStorage.setItem("mascota_accesorio", tipo);
+                enviarLogConsola(`Módulo ${tipo} acoplado a la estructura.`, "ok");
+                actualizarInterfazMascota();
+            } else {
+                enviarLogConsola("Créditos insuficientes.", "err");
+            }
+        }
+
+        actualizarInterfazMascota();
+
+        // FUNCIÓN PARA CONVERTIR EL DIPLOMA EN IMAGEN PNG Y DESCARGARLO
+        function descargarCertificadoImagen() {
+            const nombreAlumno = document.getElementById("student-name").value.trim();
+            const statusMsg = document.getElementById("email-status-msg");
+
+            if (!nombreAlumno || nombreAlumno === "[ ESCRIBE TU NOMBRE AQUÍ ]") {
+                statusMsg.innerText = "❌ ERROR: Por favor escribe tu nombre en el diploma antes de tomarle la foto.";
+                statusMsg.style.color = "var(--cyber-red)";
+                return;
+            }
+
+            statusMsg.innerText = "📸 Capturando tu diploma táctico...";
+            statusMsg.style.color = "var(--cyber-blue)";
+
+            const certificadoTarget = document.getElementById("printable-certificate");
+
+            html2canvas(certificadoTarget, {
+                backgroundColor: null,
+                scale: 2, 
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Certificado_CyberKids_${nombreAlumno.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                statusMsg.innerText = "🟩 ¡Imagen descargada con éxito! Ya puedes imprimirla. 🖨️";
+                statusMsg.style.color = "var(--cyber-green)";
+                enviarLogConsola("Captura de credencial de egreso exportada al sistema local.", "ok");
+            }).catch(err => {
+                statusMsg.innerText = "❌ ERROR: Falló la renderización del archivo gráfico.";
+                statusMsg.style.color = "var(--cyber-red)";
+                console.error("Error de html2canvas:", err);
+            });
+        }
+    </script>
+</body>
+</html>
