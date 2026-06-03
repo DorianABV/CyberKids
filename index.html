@@ -4,28 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberKids - Aprendizaje Seguro y Divertido</title>
-    <!-- Vinculación del archivo CSS externo -->
     <link rel="stylesheet" href="css/estilos.css">
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <style>
+        .cyber-logo-container {
+            display: flex;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace; /* Vibra hacker/consola */
+            font-weight: bold;
+            font-size: 26px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .logo-icon {
+            margin-right: 8px;
+            font-size: 24px;
+            animation: blink 1.5s infinite;
+        }
+        .logo-text-1 {
+            color: var(--cyber-green, #00ff66); /* Verde Hacker brillante */
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+        }
+        .logo-text-2 {
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .logo-badge {
+            background-color: var(--cyber-red, #ff0055); /* Rojo Neón */
+            color: white;
+            font-size: 11px;
+            font-family: 'Arial', sans-serif;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 8px var(--cyber-red, #ff0055);
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+        .logo-img {
+            height: 40px; /* Ajusta la altura para que encaje bien en tu header */
+            width: auto;  /* Mantiene la proporción original de la imagen */
+            margin-right: 10px; /* Separa el robot del texto "CYBERKIDS" */
+            filter: drop-shadow(0 0 6px rgba(0, 255, 102, 0.5)); /* Le da un brillo neón al robot */
+        }
+    </style>
 </head>
 <body>
 
-    <!-- BARRA DE NAVEGACIÓN -->
     <header>
     <div class="nav-container">
-        <div class="logo">🛡️ CyberKids</div>
+        
+        <a href="index.html" class="cyber-logo-container">
+            <img src="img/logo.png" alt="CyberKids Logo" class="logo-img">
+            <span class="logo-text-1">CYBER</span><span class="logo-text-2">KIDS</span>
+            <span class="logo-badge">PRO</span>
+        </a>
+
         <nav>
             <ul>
-                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.html" class="active">Inicio</a></li>
                 <li><a href="juegos.html">Jugar y Aprender</a></li>
                 <li><a href="teoria.html">Biblioteca Segura</a></li>
-                <li><a href="familia.html">Espacio Familiar</a></li> <!-- El nuevo enlace -->
-            </ul>
+                <li><a href="familia.html">Espacio Familiar</a></li> </ul>
         </nav>
         <div class="global-score">Puntos: <span id="user-points">0</span> 🌟</div>
     </div>
     </header>
 
-    <!-- SECCIÓN BIENVENIDA (HERO) -->
     <main>
         <section class="hero">
             <div class="hero-content">
@@ -35,12 +85,10 @@
             </div>
         </section>
 
-        <!-- SECCIÓN DE OPCIONES / MÓDULOS PRINCIPALES -->
         <section class="modules-container">
             <h2>¿Qué quieres hacer hoy?</h2>
             <div class="grid-modules">
                 
-                <!-- Tarjeta 1: Ir a los Juegos -->
                 <div class="card-module">
                     <div class="card-icon">🎮</div>
                     <h3>Zona de Juegos</h3>
@@ -48,7 +96,6 @@
                     <a href="juegos.html" class="btn-card">Ir a Jugar</a>
                 </div>
 
-                <!-- Tarjeta 2: Consejos Teóricos (Constructivismo) -->
                 <div class="card-module">
                     <div class="card-icon">📚</div>
                     <h3>Aprende Ciberseguridad</h3>
@@ -56,7 +103,6 @@
                     <a href="teoria.html" class="btn-card">Ver Consejos</a>
                 </div>
 
-                <!-- Tarjeta 3: Sección Familias (Soporte según Teoría del Aprendizaje Social) -->
                 <div class="card-module">
                     <div class="card-icon">👨‍👩‍👧</div>
                     <h3>Espacio Familiar</h3>
@@ -68,12 +114,10 @@
         </section>
     </main>
 
-    <!-- PIE DE PÁGINA -->
     <footer>
         <p>&copy; 2026 CyberKids - Proyecto de Ciberseguridad. Desarrollado con fines educativos.</p>
     </footer>
 
-    <!-- Vinculación del script JavaScript global -->
     <script src="js/main.js"></script>
     <script src="js/cyber-matrix.js"></script>
 </body>
